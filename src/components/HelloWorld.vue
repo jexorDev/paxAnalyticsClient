@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import PaxChart from "./PaxChart.vue";
 
 defineProps({
   msg: String,
@@ -9,6 +10,7 @@ const count = ref(0)
 </script>
 
 <template>
+  <PaxChart></PaxChart>
   <h1>{{ msg }}</h1>
 
   <div class="card">
