@@ -8,5 +8,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     PaxChart: typeof import('./src/components/PaxChart.vue')['default']
+    PaxComparisonTable: typeof import('./src/components/PaxComparisonTable.vue')['default']
   }
 }

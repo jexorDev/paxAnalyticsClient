@@ -9,8 +9,8 @@ export function getDateTime(hour: number, minute: number, dayOffset: number): Da
     return date;
 }
 
-// function getLocalHour(hourUtc: number): number {
-//     var dateUtc = new Date();
-//     dateUtc.setUTCHours(hourUtc);
-//     return dateUtc.getHours();
-// }
+export function getLocalHour(hourUtc: number): number {
+    var dateUtc = new Date();
+    dateUtc.setUTCHours(hourUtc);
+    return dateUtc.getHours();
+}
