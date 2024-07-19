@@ -1,87 +1,97 @@
 <template>
-    <div style="width: 400px">
-      <div style="display: flex; justify-content: center">
-        
-      </div>
-      <BarChart v-bind="barChartProps" />
-    </div>
+    <v-card width="700">
+      <v-card-title>Monday</v-card-title>
+      <v-card-text>
+        <LineChart v-bind="lineChartProps" />
+
+      </v-card-text>
+      
+    </v-card>
   </template>
   
-  <script lang='ts'>
-  import { computed, defineComponent, ref } from "vue";
-  import { BarChart, useBarChart } from "vue-chart-3";
+  <script setup lang='ts'>
+  import { computed, ref, onMounted } from "vue";
+  import { LineChart, useLineChart } from "vue-chart-3";
   import { Chart, ChartData, ChartOptions, registerables } from "chart.js";
-  
+  import PaxVolumeHour from "../models/PaxVolumeHour";
+
+  const props = defineProps<{
+    data: PaxVolumeHour[]
+  }>();
+
+  const dataSorted = computed<PaxVolumeHour[]>(() => props.data)
+
+  const arrivals = computed<number[]>(() => dataSorted.value.map(x => x.arrivingPassengers));
+    const departures = computed<number[]>(() => dataSorted.value.map(x => x.departingPassengers));
+      const totals = computed<number[]>(() => dataSorted.value.map(x => x.arrivingPassengers + x.departingPassengers));
+
   Chart.register(...registerables);
-  export default defineComponent({
-    name: "App",
-    components: { BarChart },
-    setup() {
-      const dataValues = ref([30, 40, 60, 70, 5]);
-      const dataLabels = ref(["Paris", "Nîmes", "Toulon", "Perpignan", "Autre"]);
-      const toggleLegend = ref(true);
   
-      const testData = computed<ChartData<"bar">>(() => ({
+      
+      const dataLabels = ref<string[]>([]);
+
+      onMounted(() => {
+        for (var i = 0; i < 24; i++) {
+          dataLabels.value.push(`${i}:00`);
+        }
+      })
+  
+      const testData = computed<ChartData<"line">>(() => ({
         labels: dataLabels.value,
         datasets: [
-          {
-            data: dataValues.value,
-            backgroundColor: [
-              "#77CEFF",
-              "#0079AF",
-              "#123E6B",
-              "#97B0C4",
-              "#A5C8ED",
-            ],
-          },
-          {
-            type: "line",
-            data: dataValues.value,
-            borderColor: "pink"
-          },
-        ],
+   
+    {
+      label: 'Arrivals',
+      data: arrivals.value,
+      borderColor: "crimson",
+      backgroundColor: "crimson",
+      type: "line",
+    },
+    {
+      label: 'Departures',
+      data: departures.value,
+      borderColor: "LimeGreen",
+      backgroundColor: "LimeGreen",
+      type: "line",
+    },
+    {
+      label: 'Total',
+      data: totals.value,
+      backgroundColor: "RoyalBlue",
+      barThickness: 20,
+      type: 'bar'
+    },
+  ]
       }));
   
-      const options = computed<ChartOptions<"bar">>(() => ({
-        scales: {
-          myScale: {
-            type: "logarithmic",
-            position: toggleLegend.value ? "left" : "right",
-          },
-        },
+      const options = computed<ChartOptions<"line">>(() => ({
         plugins: {
           legend: {
-            position: toggleLegend.value ? "top" : "bottom",
-          },
-          title: {
-            display: true,
-            text: "Chart.js Doughnut Chart",
-          },
+            display: false
+          }
         },
+        scales: {
+        x: {
+            ticks: {
+                autoSkip: false
+            }
+        }
+    },
+    responsive: true,
+    maintainAspectRatio: false
       }));
   
-      const { barChartProps, barChartRef } = useBarChart({
+      const { lineChartProps } = useLineChart({
         chartData: testData,
         options,
       });
   
-      let index = ref(20);
   
       
   
-      function switchLegend() {
-        toggleLegend.value = !toggleLegend.value;
-      }
+     
   
-      return {
-        switchLegend,
-        testData,
-        options,
-        barChartRef,
-        barChartProps,
-      };
-    },
-  });
+   
   </script>
   
   <style>
