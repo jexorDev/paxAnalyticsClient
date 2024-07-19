@@ -36,6 +36,7 @@
         }
       })
   
+      // @ts-ignore
       const testData = computed<ChartData<"line">>(() => ({
         labels: dataLabels.value,
         datasets: [
