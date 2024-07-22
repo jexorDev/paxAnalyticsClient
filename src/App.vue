@@ -1,18 +1,24 @@
 <template>
     <v-app>
-    <v-main>
-      <v-container fluid>
-        <v-row>
-          <v-col>
-            <v-card>
-              <v-card-title>PAX Analytics</v-card-title>
-              <v-card-subtitle>July 19, 2024</v-card-subtitle>
-            </v-card>
+      <v-main>
+      <v-card>
+    <v-tabs
+      v-model="tab"
+      bg-color="primary"
+    >
+      <v-tab value="today">Home</v-tab>
+      <v-tab value="threeday">Comparison</v-tab>
+      <v-tab value="week">Week</v-tab>
+    </v-tabs>
 
-            
-          </v-col>
-        </v-row>
-        <v-row>
+    <v-card-text>
+      <v-tabs-window v-model="tab">
+        <v-tabs-window-item value="today">
+          <CurrentDay :data="paxVolData"></CurrentDay>
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="threeday">
+          <v-row>
           <v-col>
             <PaxChart title="Yesterday" :data="yesterday"></PaxChart>
             <PaxComparisonTable :is-comparison="true" :data="todayYesterdayComparison"></PaxComparisonTable>
@@ -26,8 +32,20 @@
             <PaxComparisonTable :is-comparison="true" :data="todayLastWeekComparison"></PaxComparisonTable>
           </v-col>
         </v-row>
+        </v-tabs-window-item>
+
+        <v-tabs-window-item value="week">
+          Three
+        </v-tabs-window-item>
+      </v-tabs-window>
+    </v-card-text>
+  </v-card>
+      <v-container fluid>
+      
+       
 
       </v-container>
+     
       
     </v-main>
   </v-app>
@@ -39,42 +57,38 @@ import {onMounted, ref, computed} from 'vue';
 import getPaxVolume from "./requests/PaxVolumeRequests"
 import PaxVolumeHour from "./models/PaxVolumeHour";
 import {getLocalHour} from './utility/DateTimeUtility';
+import {getComparison} from "./utility/PaxVolumeHourUtility";
+import CurrentDay from "./components/CurrentDay.vue"
+//type PaxVolHourMapType = Record<number, PaxVolumeHour[]>;
 
-const today = ref<PaxVolumeHour[]>([]);
-const lastWeek = ref<PaxVolumeHour[]>([]);
-const yesterday = ref<PaxVolumeHour[]>([]);
+const paxVolData = ref(new Map<number, PaxVolumeHour[]>());
 
-const todayLastWeekComparison = computed<PaxVolumeHour[]>(() => getComparison(today.value, lastWeek.value));
-const todayYesterdayComparison = computed<PaxVolumeHour[]>(() => getComparison(today.value, yesterday.value));
+const tab = ref("today")
+
+const today = computed(() => paxVolData.value.get(0) ?? []);
+const lastWeek = computed(() => paxVolData.value.get(-6) ?? []);
+const yesterday = computed(() => paxVolData.value.get(-1) ?? []);;
+
+const todayLastWeekComparison = computed<PaxVolumeHour[]>(() => getComparison(today?.value ?? [], lastWeek?.value ?? []));
+const todayYesterdayComparison = computed<PaxVolumeHour[]>(() => getComparison(today?.value ?? [], yesterday?.value ?? []));
 
 onMounted(async () => {
-  Promise.all([
-    today.value = await getData(0),
-    lastWeek.value = await getData(-7),
-    yesterday.value = await getData(-1),
+  
+  for (var i = -6; i < 1; i++) {
+    const data = await getData(i);
+    paxVolData.value.set(i, data);
+  }
 
-  ])
+  // Promise.all([
+  //   today.value = await getData(0),
+  //   lastWeek.value = await getData(-7),
+  //   yesterday.value = await getData(-1),
+
+  // ])
   
 })
 
-function getComparison(currentDayData: PaxVolumeHour[], comparisonDayData: PaxVolumeHour[]): PaxVolumeHour[] {
-  const comparisonHours: PaxVolumeHour[] = [];
 
-  for (const currentDayHour of currentDayData) {
-    const comparisonDayHour = comparisonDayData.find(x => x.hour === currentDayHour.hour);
-    if (comparisonDayHour) {
-      comparisonHours.push({
-        hour: currentDayHour.hour,
-        arrivingFlights: currentDayHour.arrivingFlights - comparisonDayHour.arrivingFlights,
-        arrivingPassengers: currentDayHour.arrivingPassengers - comparisonDayHour.arrivingPassengers,
-        departingFlights: currentDayHour.departingFlights - comparisonDayHour.departingFlights,
-        departingPassengers: currentDayHour.departingPassengers - comparisonDayHour.departingPassengers,
-      })  
-    }
-  }
-
-  return comparisonHours;
-}
 
 async function getData(dayOffset: number) {
   const result = await getPaxVolume(dayOffset);

@@ -7,7 +7,9 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    CurrentDay: typeof import('./src/components/CurrentDay.vue')['default']
     PaxChart: typeof import('./src/components/PaxChart.vue')['default']
     PaxComparisonTable: typeof import('./src/components/PaxComparisonTable.vue')['default']
+    WeekChart: typeof import('./src/components/WeekChart.vue')['default']
   }
 }

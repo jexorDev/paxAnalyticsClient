@@ -74,7 +74,7 @@
       {
         label: 'Total',
         data: totals.value,
-        backgroundColor: "RoyalBlue",
+        backgroundColor: "RoyalBlue",        
         barThickness: 20,
         type: 'bar'
       },
