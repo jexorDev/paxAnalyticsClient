@@ -2,7 +2,61 @@
     <v-card>
         <v-card-title>Week PAX Count</v-card-title>
       <v-card-text>
-        <BarChart v-bind="barChartProps" />
+        <v-container>
+          <v-row>
+            <v-col>
+              <BarChart v-bind="barChartProps" />
+
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col>
+              <v-card color="indigo">
+                <v-card-text>   
+                    <v-row>
+                        <v-col>
+                            BUSIEST DAY
+                            <div class="text-h3">
+                        
+                        {{ busiestDayLabel }}
+                    </div>
+                        </v-col>
+                        <v-col>
+                            TOTAL PAX
+                            <div class="text-h3">
+                        
+                                {{ busiestDayTotal }}
+
+                            </div>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col>
+                            SLOWEST DAY
+                            <div class="text-h3">
+                        {{ slowestDayLabel }}
+                    
+        
+                    </div>
+                        </v-col>
+                        <v-col>
+                            TOTAL PAX
+                            <div class="text-h3">
+                                {{ slowestDayTotal }}
+                    
+
+                            </div>
+                        </v-col>
+                    </v-row>         
+                    
+                    
+                </v-card-text>
+            </v-card>
+            </v-col>
+            
+          </v-row>
+
+        </v-container>
       </v-card-text>
     </v-card>
   </template>
@@ -31,6 +85,20 @@
   Chart.register(...registerables);
       
   const days = computed(() => [...props.data.keys()])
+  const busiestDayIndex = computed(() => {
+    return totals.value.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);    
+  });
+
+  const slowestDayIndex = computed(() => {
+    return totals.value.reduce((iMin, x, i, arr) => x < arr[iMin] ? i : iMin, 0);    
+  });
+
+  const busiestDayTotal = computed(() => totals.value[busiestDayIndex.value]);
+  const busiestDayLabel = computed(() => dataLabels.value[busiestDayIndex.value]);
+  const slowestDayTotal = computed(() => totals.value[slowestDayIndex.value]);
+  const slowestDayLabel = computed(() => dataLabels.value[slowestDayIndex.value]);
+
+
   const dataLabels = computed(() => days.value.map(x => {
     const date = new Date();
     date.setDate(date.getDate() + x);
@@ -43,27 +111,33 @@
     datasets: [   
       {
         data: totals.value,
-        backgroundColor: "dodgerBlue",        
+        backgroundColor: "royalBlue",        
         barThickness: 40,
       },
     ]
   }));
   
   const options = computed<ChartOptions<"bar">>(() => ({
+    
     plugins: {
+      
       legend: {
             display: false
           }
         },
         scales: {
-        x: {
-            ticks: {
-                autoSkip: false
-            }
+        y: {
+          
+              ticks: {
+                
+                stepSize: 25000
+              }
+            
         }
     },
     responsive: true,
-    maintainAspectRatio: false
+    aspectRatio: 2,
+    maintainAspectRatio: true
       }));
   
       const { barChartProps } = useBarChart({
