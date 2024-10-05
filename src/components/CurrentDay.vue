@@ -77,7 +77,7 @@
     }>();
 
     const today = computed(() => props.data.get(0) ?? []);
-    const todayTotalPax = computed(() => today.value.map(x => x.arrivingPassengers + x.departingPassengers).reduce((x, acc) => x + acc))
+    const todayTotalPax = computed(() => today.value.map(x => x.arrivingPassengers + x.departingPassengers).reduce((x, acc) => x + acc, 0))
     const maxPaxHour = computed(() => {
         if (today.value.length === 0) return 0;
         var hour = 0;
