@@ -75,8 +75,13 @@ const todayYesterdayComparison = computed<PaxVolumeHour[]>(() => getComparison(t
 onMounted(async () => {
   
   for (var i = -6; i < 1; i++) {
-    const data = await getData(i);
-    paxVolData.value.set(i, data);
+    try {
+      const data = await getData(i);
+      paxVolData.value.set(i, data);
+
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   // Promise.all([
